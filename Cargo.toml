@@ -2,9 +2,18 @@
 name = "tx2-query"
 version = "0.1.0"
 edition = "2021"
+authors = ["Ire Gaddr <github@iregaddr.com>"]
+license = "MIT"
+description = "SQL analytics layer for TX-2 ECS - one-way synchronization from ECS to SQL databases"
+repository = "https://github.com/IreGaddr/tx2-query"
+homepage = "https://github.com/IreGaddr/tx2-query"
+documentation = "https://docs.rs/tx2-query"
+readme = "README.md"
+keywords = ["ecs", "sql", "analytics", "database", "query"]
+categories = ["database", "game-development", "data-structures"]
 
 [dependencies]
-tx2-link = { path = "../tx2-link" }
+tx2-link = { version = "0.1.0", path = "../tx2-link" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 thiserror = "1.0"
