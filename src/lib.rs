@@ -9,7 +9,7 @@
 //! - **ECS World → SQL Database**: One-way synchronization from ECS to SQL
 //! - **Component → Table Mapping**: Automatic schema generation from component types
 //! - **Incremental Sync**: Track and sync only changed entities/components
-//! - **Multiple Backends**: PostgreSQL, SQLite, and more
+//! - **Multiple Backends**: PostgreSQL, SQLite, DuckDB, and more
 //!
 //! # Features
 //!
@@ -74,7 +74,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! tx2-query = { version = "0.1", features = ["postgres", "sqlite"] }
+//! tx2-query = { version = "0.1", features = ["postgres", "sqlite", "duckdb"] }
 //! ```
 //!
 //! # Philosophy
@@ -98,6 +98,9 @@ pub mod postgres;
 #[cfg(feature = "sqlite")]
 pub mod sqlite;
 
+#[cfg(feature = "duckdb")]
+pub mod duckdb;
+
 pub use backend::{DatabaseBackend, QueryResult, QueryRow, Transaction};
 pub use builder::{
     AggregateFunc, ComparisonOp, Condition, DeleteBuilder, JoinType, LogicalOp, SelectBuilder,
@@ -112,6 +115,9 @@ pub use postgres::PostgresBackend;
 
 #[cfg(feature = "sqlite")]
 pub use sqlite::SqliteBackend;
+
+#[cfg(feature = "duckdb")]
+pub use duckdb::DuckDBBackend;
 
 /// Prelude for common imports
 pub mod prelude {
@@ -128,6 +134,9 @@ pub mod prelude {
 
     #[cfg(feature = "sqlite")]
     pub use crate::sqlite::SqliteBackend;
+
+    #[cfg(feature = "duckdb")]
+    pub use crate::duckdb::DuckDBBackend;
 }
 
 #[cfg(test)]

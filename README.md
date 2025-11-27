@@ -25,6 +25,7 @@ tx2-query provides a SQL side-car database for TX-2 applications. It's designed 
 - **Sync API**: Incremental synchronization with batching
 - **Backend Abstraction**: Support for multiple SQL databases
 - **Type-Safe**: Leverages Rust's type system for safety
+- **DuckDB Support**: OLAP workloads with columnar storage and window functions
 
 ## Installation
 
@@ -32,7 +33,7 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-tx2-query = { version = "0.1", features = ["postgres", "sqlite"] }
+tx2-query = { version = "0.1", features = ["postgres", "sqlite", "duckdb"] }
 tokio = { version = "1.0", features = ["full"] }
 ```
 
@@ -123,6 +124,24 @@ use tx2_query::postgres::PostgresBackend;
 let backend = PostgresBackend::connect(
     "postgresql://user:password@localhost/database"
 ).await?;
+```
+
+### DuckDB
+
+```rust
+use tx2_query::duckdb::DuckDBBackend;
+
+// In-memory database (perfect for analytics)
+let backend = DuckDBBackend::memory().await?;
+
+// File-based database
+let backend = DuckDBBackend::file("analytics.duckdb").await?;
+
+// Export to Parquet for external analysis
+backend.export_parquet("Player", "players.parquet").await?;
+
+// Import from Parquet
+backend.import_parquet("Player", "players.parquet").await?;
 ```
 
 ## Query Builder
@@ -258,6 +277,38 @@ Supported SQL types:
 - `SqlType::Json` - JSON/JSONB data
 - `SqlType::Bytea` - Binary data
 
+## Why DuckDB for Analytics?
+
+DuckDB is optimized for OLAP workloads and provides several advantages:
+
+- **Columnar Storage**: Efficient storage and query performance for analytics
+- **Window Functions**: Advanced analytics with `ROW_NUMBER()`, `RANK()`, `LAG()`, etc.
+- **Parquet Integration**: Export/import data in industry-standard format
+- **No Server Required**: Embedded database, no separate process
+- **Fast Aggregations**: Optimized for `GROUP BY`, `SUM()`, `AVG()`, etc.
+- **Join Performance**: Excellent performance on complex joins
+
+Example analytical query:
+
+```rust
+use tx2_query::duckdb::DuckDBBackend;
+use tx2_query::prelude::*;
+
+let mut backend = DuckDBBackend::memory().await?;
+let sync = QuerySync::new(backend, schema_gen);
+
+// Complex analytical query with window functions
+let results = sync.query("
+    SELECT
+        player_name,
+        score,
+        AVG(score) OVER (PARTITION BY level) as avg_level_score,
+        RANK() OVER (ORDER BY score DESC) as global_rank
+    FROM Player
+    WHERE active = true
+").await?;
+```
+
 ## Use Cases
 
 ### Analytics Dashboard
@@ -319,7 +370,7 @@ Contributions are welcome! Please open an issue or PR on GitHub.
 
 ## Roadmap
 
-- [ ] DuckDB backend for OLAP workloads
+- [x] DuckDB backend for OLAP workloads
 - [ ] ClickHouse backend for time-series analytics
 - [ ] Historical queries via tx2-pack integration
 - [ ] Materialized views support

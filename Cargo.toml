@@ -23,15 +23,17 @@ anyhow = "1.0"
 sqlx = { version = "0.7", features = ["runtime-tokio-native-tls", "postgres", "sqlite", "chrono"], optional = true }
 tokio = { version = "1.0", features = ["full"], optional = true }
 async-trait = "0.1"
+duckdb = { version = "1.1", features = ["bundled"], optional = true }
 
 # Schema introspection
 chrono = "0.4"
 ahash = "0.8"
 
 [features]
-default = ["postgres", "sqlite"]
+default = ["postgres", "sqlite", "duckdb"]
 postgres = ["sqlx", "tokio"]
 sqlite = ["sqlx", "tokio"]
+duckdb = ["dep:duckdb", "tokio"]
 
 [dev-dependencies]
 tempfile = "3.0"
